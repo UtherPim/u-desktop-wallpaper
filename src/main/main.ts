@@ -1,19 +1,30 @@
 /**
  * Entry point of the Election app.
  */
+
+
 import * as path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { BrowserWindow, app, globalShortcut } from 'electron';
+import { BrowserWindow, app, globalShortcut, Menu } from 'electron';
 import * as nodeEnv from '_utils/node-env';
 import './ipc-listerner';
+import fs from 'fs'
+
+const appDataPath = path.join(app.getPath('appData'), 'u-desktop')
+const bingCachePath = path.join(appDataPath, 'bing-pic')
+const wallhavenCachePath = path.join(appDataPath, 'wallhaven-pic')
+const dynamicCachePath = path.join(appDataPath, 'dynamic-pic')
 
 let mainWindow: Electron.BrowserWindow | undefined;
 
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+    height: 720,
+    width: 1440,
+    hasShadow: true,
+    frame: false,
+    transparent: true,
     webPreferences: {
       devTools: nodeEnv.dev,
       preload: path.join(__dirname, './preload.bundle.js'),
@@ -36,11 +47,30 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   if (nodeEnv.dev || nodeEnv.prod) createWindow();
+  nodeEnv.dev && mainWindow?.webContents.openDevTools()
   globalShortcut.register('CommandOrControl+O', () => {
     mainWindow?.webContents.openDevTools();
   });
+  globalShortcut.register('CommandOrControl+R', () => {
+    mainWindow?.reload();
+  });
+  Menu.setApplicationMenu(null);
+
+  if(!fs.existsSync(appDataPath)) {
+    try{
+      fs.mkdirSync(appDataPath, { recursive: true })
+      if(!fs.existsSync(bingCachePath))
+      await fs.promises.mkdir(bingCachePath, { recursive: true })
+      if(!fs.existsSync(wallhavenCachePath))
+      await fs.promises.mkdir(wallhavenCachePath, { recursive: true })
+      if(!fs.existsSync(dynamicCachePath))
+      await fs.promises.mkdir(dynamicCachePath, { recursive: true })
+    }catch(e) {
+      console.log(e)
+    }
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows.length === 0) createWindow();

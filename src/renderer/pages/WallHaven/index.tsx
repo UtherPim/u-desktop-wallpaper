@@ -48,11 +48,13 @@ const Wallhaven: React.FC = () => {
         })
     }
     const onDownload = (url: string, title?: string) => {
-        downloadUHDSource(url).then(res => {
+        const [name, raw] = url.split('--')
+        console.log(url, raw, name)
+        downloadUHDSource(raw).then(res => {
             const blob = new Blob([res]); //处理文档流
             const elink = document.createElement('a');
             elink.style.display = 'none';
-            elink.download = title? title: new Date().getTime() + '.jpg'
+            elink.download = title? title: name + '.jpg'
             elink.href = URL.createObjectURL(blob);
             document.body.appendChild(elink);
             elink.click();
@@ -62,7 +64,8 @@ const Wallhaven: React.FC = () => {
         
     }
     const onSet2WallPaper = (url: string, title?: string) => {
-        window.ipcAPI?.setWallpaper(url, { filename: title + '.jpg', from: 'wallhaven' }).then(() => {
+        const [name, raw] = url.split('--')
+        window.ipcAPI?.setWallpaper(raw, { filename: title ? title: name + '.jpg', from: 'wallhaven' }).then(() => {
             message.success('设置成功')
         })
     }
@@ -93,7 +96,7 @@ const Wallhaven: React.FC = () => {
                 {
                     wallHavenPaperList.map((wp, i) => (
                         <div key={wp.id + i} className={styled.paperItem}>
-                            <Image width={200} height={120} alt={wp.raw}
+                            <Image width={200} height={120} alt={wp.name + '--' + wp.raw}
                                 src={wp.thumb}
                                 preview={{
                                     destroyOnClose: true,
@@ -107,7 +110,7 @@ const Wallhaven: React.FC = () => {
                                       },
                                     ) => (
                                       <Space size={12} className="toolbar-wrapper">
-                                        <PictureOutlined onClick={() => onSet2WallPaper(url, alt)} />
+                                        <PictureOutlined onClick={() => onSet2WallPaper(alt)} />
                                         <DownloadOutlined onClick={() => onDownload(alt)} />
                                         <SwapOutlined rotate={90} onClick={onFlipY} />
                                         <SwapOutlined onClick={onFlipX} />

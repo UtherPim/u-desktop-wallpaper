@@ -3,29 +3,38 @@ import axios from './index'
 export interface BingPaper {
     copyright: string,
     copyrightlink?: string,
-    startdate: string,
+    startdate?: string,
     enddate: string,
-    title: string,
-    url: string,
-    urlbase: string
+    fullSrc: string,
+    raw: string,
+    thumb: string,
+    urlbase: string,
+    _id: string
 }
 
 export interface BingListRes {
-    Total: number,
-    message: string,
-    success: boolean,
-    data: BingPaper[]
+    count?: number,
+    msg: string,
+    code: number,
+    data: BingPaper[],
+    page?: number,
+    pages?: number,
+    size?: number
 }
 
-export const getBingPaperList = (lang: string = 'zh-CN_all'): Promise<BingListRes> => axios({
-    url: `https://raw.onmicrosoft.cn/Bing-Wallpaper-Action/main/data/${lang}.json`
+export type BingListParams=  {
+    page: number,
+    size: number,
+}
+
+export const getBingPaperList = (params: BingListParams): Promise<BingListRes> => axios({
+    url: `https://api.codelife.cc/bing/list?lang=cn&page=${params.page}&size=${params.size}`
 })
 
 
-export const download4kBingPaper = (urlbase: string): Promise<Blob> => {
-    const rUrl = urlbase + '_UHD.jpg'
+export const download4kBingPaper = (url: string): Promise<Blob> => {
     return axios({
-        url: rUrl,
+        url,
         responseType: 'blob'
     })
 }

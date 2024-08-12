@@ -16,17 +16,25 @@ import { getBingPaperList, download4kBingPaper } from '_renderer/request/bing'
 import { bingState } from '_renderer/store/bing'
 import { useAppSelector, useAppDispatch } from '_renderer/store/hooks'
 
+const isScrollBottom = (dom?: HTMLElement | null):boolean => {
+    if(!dom) return false;
+    const scrollTop = dom.scrollTop; // 获取当前滚动条的位置
+    const viewportHeight = dom.clientHeight
+    const documentHeight = dom.scrollHeight; // dom的总高度
+ 
+    return scrollTop + viewportHeight >= documentHeight; // 当滚动位置加上视口高度大于等于文档高度时，表明到达底部
+}
+
+
 const Bing: React.FC = () => {
 
     const [todayPaper, setTodayPaper] = useState<BingPaper>()
     const [bingPaperList, setBingPaperList] = useState<BingPaper[]>([])
-    const [bingPaperTotal, setBingPaperTotal] = useState(0)
-    const stateValue = useAppSelector(bingState)
-    const ref = useRef<HTMLDivElement | null>(null)
+    const currentPage = useRef(1)
+    const paperContainer = useRef<HTMLDivElement>(null)
     useEffect(() => {
-        getBingPaperList().then(res => {
-            setBingPaperList(res.data.slice(1, 101))
-            setBingPaperTotal(res.Total)
+        getBingPaperList({page: 1, size: 30}).then(res => {
+            setBingPaperList(res.data)
             setTodayPaper(res.data[0])
         })
     }, [])
@@ -35,11 +43,15 @@ const Bing: React.FC = () => {
         window.open('https://cn.bing.com/', '_blank')
     }
     const handleView4K = (url: string, title?: string) => {
+        if(!url) {
+            message.warning('图像资源未加载，无法下载！')
+            return
+        }
         download4kBingPaper(url).then(res => {
             const blob = new Blob([res]); //处理文档流
             const elink = document.createElement('a');
             elink.style.display = 'none';
-            elink.download = title? title + '.jpg': todayPaper?.title + '.jpg'
+            elink.download = title? title + '.jpg': todayPaper?.enddate + '.jpg'
             elink.href = URL.createObjectURL(blob);
             document.body.appendChild(elink);
             elink.click();
@@ -48,22 +60,60 @@ const Bing: React.FC = () => {
         })
     }
     const onDownload = (url: string, title?: string) => {
-        const urlbase = url.split('_1920x1080')[0]
-        handleView4K(urlbase, title)
+        const [name, raw] = url.split('--')
+        handleView4K(raw, name)
     }
-    const onSet2WallPaper = (url: string) => {
-        const urlbase = url.split('_1920x1080')[0]
-        const picName = urlbase.split('?')[1].split('=')[1] + '.jpg'
-        window.ipcAPI?.setWallpaper(urlbase + '_UHD.jpg', { filename: picName, from: 'bing' }).then(() => {
+    const onSet2WallPaper = (url: string, title?: string) => {
+        const [name, raw] = url.split('--')
+        window.ipcAPI?.setWallpaper(raw, { filename: title ? title: name + '.jpg', from: 'wallhaven' }).then(() => {
             message.success('设置成功')
         })
+    }
+
+    const handleScroll = () => {
+        if (isScrollBottom(paperContainer.current)) {
+            console.log("滚动条已经触底");
+            getBingPaperList({page: currentPage.current + 1, size: 24}).then(res => {
+                const {data} = res
+                currentPage.current += 1
+                setBingPaperList([...bingPaperList, ...data])
+            })
+            // 在这里执行触底时的操作
+        }
     }
 
     return (
         <div className={ styled.bingContainer }>
             <div className={styled.bingToday}>
                 <div className={styled.todayPic}>
-                    <Image height={120} width={200} src={`${stateValue.baseUrl + (todayPaper? todayPaper.url: '')}`} />
+                    <Image height={120} width={200} 
+                        src={`${todayPaper? todayPaper.thumb: ''}`}
+                        alt={todayPaper? todayPaper.enddate + '--' + todayPaper.raw: ''}
+                        preview={{
+                            destroyOnClose: true,
+                            src: todayPaper? todayPaper.raw: '',
+                            toolbarRender: (
+                              _,
+                              {
+                                image: {url, alt},
+                                transform: { scale },
+                                actions: { onFlipY, onFlipX, onRotateLeft, onRotateRight, onZoomOut, onZoomIn, onReset },
+                              },
+                            ) => (
+                              <Space size={12} className="toolbar-wrapper">
+                                <PictureOutlined onClick={() => onSet2WallPaper(alt)} />
+                                <DownloadOutlined onClick={() => onDownload(alt)} />
+                                <SwapOutlined rotate={90} onClick={onFlipY} />
+                                <SwapOutlined onClick={onFlipX} />
+                                <RotateLeftOutlined onClick={onRotateLeft} />
+                                <RotateRightOutlined onClick={onRotateRight} />
+                                <ZoomOutOutlined disabled={scale === 1} onClick={onZoomOut} />
+                                <ZoomInOutlined disabled={scale === 50} onClick={onZoomIn} />
+                                <UndoOutlined onClick={onReset} />
+                              </Space>
+                            ),
+                          }}
+                    />
                 </div>
                 <div className={styled.todayInfo}>
                     <p className={styled.infoItem} style={{ marginBottom: '16px' }}>{ todayPaper?.copyright }</p>
@@ -71,17 +121,19 @@ const Bing: React.FC = () => {
                     <p className={styled.infoItem}>
                         图像来源：
                         <Button onClick={handleJumpToBing} type="link">必应</Button>
-                        <Button onClick={() => { handleView4K(`${stateValue.baseUrl + (todayPaper? todayPaper.urlbase: '')}`) }} type="link">点此下载4K高清壁纸</Button>
+                        <Button onClick={() => { handleView4K(todayPaper? todayPaper.fullSrc: '') }} type="link">点此下载4K高清壁纸</Button>
                     </p>
                 </div>
             </div>
-            <div className={styled.bingList}>
+            <div className={styled.bingList} ref={paperContainer} onScroll={handleScroll}>
                 {
-                    bingPaperList.map(bp => (
-                        <div key={bp.url} className={styled.bingItem}>
-                            <Image width={200} height={120} alt={bp.title}
-                                src={`${stateValue.baseUrl + bp.url}`}
+                    bingPaperList.map((bp, i) => (
+                        <div key={bp._id + i} className={styled.bingItem}>
+                            <Image width={200} height={120} alt={bp.enddate + '--' + bp.raw}
+                                src={bp.thumb}
                                 preview={{
+                                    destroyOnClose: true,
+                                    src: bp.raw,
                                     toolbarRender: (
                                       _,
                                       {
@@ -91,8 +143,8 @@ const Bing: React.FC = () => {
                                       },
                                     ) => (
                                       <Space size={12} className="toolbar-wrapper">
-                                        <PictureOutlined onClick={() => onSet2WallPaper(url)} />
-                                        <DownloadOutlined onClick={() => onDownload(url, alt)} />
+                                        <PictureOutlined onClick={() => onSet2WallPaper(alt)} />
+                                        <DownloadOutlined onClick={() => onDownload(alt)} />
                                         <SwapOutlined rotate={90} onClick={onFlipY} />
                                         <SwapOutlined onClick={onFlipX} />
                                         <RotateLeftOutlined onClick={onRotateLeft} />

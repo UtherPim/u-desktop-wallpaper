@@ -9,7 +9,7 @@ export interface BingState {
 }
 
 const initialState = {
-    baseUrl: 'https://s.cn.bing.net',
+    baseUrl: 'https://www4.bing.com/',
     todayUrl: '',
     lang: 'zh_CN_all',
     size: '1920*1080'

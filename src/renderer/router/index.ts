@@ -1,6 +1,7 @@
 import PureColor from "../pages/Pure"
 import Bing from '../pages/Bing'
 import WallHaven from '../pages/WallHaven'
+import Dynamic from "../pages/Dynamic"
 
 export type IRoute = {
     path: string,
@@ -17,6 +18,11 @@ export const routes = [
     {
         path: '/bing',
         component: Bing,
+        keepAlive: true
+    },
+    {
+        path: '/dynamic',
+        component: Dynamic,
         keepAlive: true
     },
     {

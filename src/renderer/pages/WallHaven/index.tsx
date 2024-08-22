@@ -15,15 +15,7 @@ import {
     ZoomInOutlined,
     UndoOutlined 
 } from '@ant-design/icons'
-// import { isScrollBottom } from '_utils'
-const isScrollBottom = (dom?: HTMLElement | null):boolean => {
-    if(!dom) return false;
-    const scrollTop = dom.scrollTop; // 获取当前滚动条的位置
-    const viewportHeight = dom.clientHeight
-    const documentHeight = dom.scrollHeight; // dom的总高度
- 
-    return scrollTop + viewportHeight >= documentHeight; // 当滚动位置加上视口高度大于等于文档高度时，表明到达底部
-}
+import { isScrollBottom } from '_renderer/utils'
 
 const Wallhaven: React.FC = () => {
     const { typeList } = useAppSelector(wallhavenState)

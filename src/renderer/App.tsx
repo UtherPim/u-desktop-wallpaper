@@ -7,15 +7,26 @@ import KeepAlive, { AliveScope } from 'react-activation';
 import { routes } from '_renderer/router'
 import type { IRoute } from '_renderer/router'
 import PureColor from './pages/Pure';
+import FullscreenVideo from './pages/FullscreenVideo'
+
+const href: string = window?.location.href
+
+const isFullscreen = (): boolean => href.includes('dynamic-paper')
 
 const App: React.FC = () => {
   useEffect(() => {
     window.ipcAPI?.rendererReady();
+    isFullscreen()
+      ? document.body.style.borderRadius = '0px'
+      : null
   }, []);
 
   return (
     <Router>
-      <div className={styled.appContainer}>
+      {
+        isFullscreen()
+          ? <Route path="/dynamic-paper" component={FullscreenVideo} />
+          : <div className={styled.appContainer}>
         <TopFrame />
         <div className={styled.contentBox}>
           <LeftMenu />
@@ -40,6 +51,7 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+      }
     </Router>
     
   );

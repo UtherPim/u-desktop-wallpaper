@@ -4,6 +4,7 @@ import { CheckCircleOutlined } from '@ant-design/icons'
 import { Space } from 'antd'
 import { useAppSelector, useAppDispatch } from '_/renderer/store/hooks'
 import { stateValue, setColorPaper, setDefaultColor } from '_/renderer/store/app'
+import { colorToHex, generateGradientColors } from '_renderer/utils'
 
 const PureColor: React.FC = () => {
 

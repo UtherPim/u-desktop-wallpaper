@@ -13,18 +13,7 @@ import {
 } from '@ant-design/icons'
 import type { BingPaper } from '_renderer/request/bing'
 import { getBingPaperList, download4kBingPaper } from '_renderer/request/bing'
-import { bingState } from '_renderer/store/bing'
-import { useAppSelector, useAppDispatch } from '_renderer/store/hooks'
-
-const isScrollBottom = (dom?: HTMLElement | null):boolean => {
-    if(!dom) return false;
-    const scrollTop = dom.scrollTop; // 获取当前滚动条的位置
-    const viewportHeight = dom.clientHeight
-    const documentHeight = dom.scrollHeight; // dom的总高度
- 
-    return scrollTop + viewportHeight >= documentHeight; // 当滚动位置加上视口高度大于等于文档高度时，表明到达底部
-}
-
+import { isScrollBottom } from '_renderer/utils'
 
 const Bing: React.FC = () => {
 
@@ -36,6 +25,7 @@ const Bing: React.FC = () => {
         getBingPaperList({page: 1, size: 30}).then(res => {
             setBingPaperList(res.data)
             setTodayPaper(res.data[0])
+            handleScroll()
         })
     }, [])
 
@@ -76,7 +66,9 @@ const Bing: React.FC = () => {
             getBingPaperList({page: currentPage.current + 1, size: 24}).then(res => {
                 const {data} = res
                 currentPage.current += 1
-                setBingPaperList([...bingPaperList, ...data])
+                console.log(bingPaperList)
+                setBingPaperList(preList => [...preList, ...data])
+                // setBingPaperList([...bingPaperList, ...data])
             })
             // 在这里执行触底时的操作
         }
@@ -129,7 +121,7 @@ const Bing: React.FC = () => {
                 {
                     bingPaperList.map((bp, i) => (
                         <div key={bp._id + i} className={styled.bingItem}>
-                            <Image width={200} height={120} alt={bp.enddate + '--' + bp.raw}
+                            <Image width={'100%'} height={120} alt={bp.enddate + '--' + bp.raw}
                                 src={bp.thumb}
                                 preview={{
                                     destroyOnClose: true,

@@ -1,15 +1,22 @@
-import {ipcMain, IpcMainInvokeEvent, app} from "electron";
+import {ipcMain, IpcMainInvokeEvent, app, BrowserWindow} from "electron";
 import type { SetOptions } from 'wallpaper'
 import { setWallpaper } from 'wallpaper'
 import axios from 'axios'
-import { SetPaperPicOption } from '_types/pic'
+import { SetPaperPicOption, SaveFileOption } from '_types/pic'
 import fs from 'fs'
 import path from 'path'
+import { createBgWindow } from '../utils'
 
 ipcMain.on('renderer-ready', () => {
   // eslint-disable-next-line no-console
     console.log('Renderer is ready.');
 });
+
+ipcMain.handle('close-win', (e: IpcMainInvokeEvent, winId: number) => {
+  const win = BrowserWindow.fromId(winId)
+  win?.close()
+})
+
 ipcMain.handle('set-wallpaper', async (e: IpcMainInvokeEvent, url: string, options: SetOptions & SetPaperPicOption) => {
   const { from, filename } = options
   return axios.get(url, { responseType: 'arraybuffer' })
@@ -24,3 +31,42 @@ ipcMain.handle('set-wallpaper', async (e: IpcMainInvokeEvent, url: string, optio
     console.log('Image saved to:', imgPath);
   })
 })
+
+ipcMain.handle('set-video-to-wallpaper', async (e: IpcMainInvokeEvent, url: string) => {
+  const win = createBgWindow(url)
+  return win.webContents.id
+})
+
+ipcMain.handle('save-file', async (e: IpcMainInvokeEvent, url: string, options: SaveFileOption) => {
+  const { from, filename } = options
+  return axios.get(url, { responseType: 'stream' }).then(async response => {
+    const filePath = path.join(app.getPath('appData'), 'u-desktop', from + '-pic', filename)
+    
+    const writestream = fs.createWriteStream(filePath)
+    response.data.pipe(writestream)
+
+    return new Promise((resolve, reject) => {
+      writestream.on('finish', () => {
+        resolve({ filePath })
+      });
+      writestream.on('error', reject);
+    });
+    
+  })
+})
+
+ipcMain.handle('has-file', (e: IpcMainInvokeEvent, options: SaveFileOption) => {
+  const { from, filename } = options
+  const filePath = path.join(app.getPath('appData'), 'u-desktop', from + '-pic', filename)
+  return new Promise((resolve, reject) => {
+    try{
+      if(fs.existsSync(filePath)) {
+        resolve(filePath)
+      }else {
+        resolve(false)
+      }
+    }catch(e) {
+      reject(e)
+    }
+  })
+}) 

@@ -12,11 +12,10 @@ const LeftMenu: React.FC = () => {
     const history = useHistory()
     const [ menuList ] = useState<MenuItem[]>([
         { name: '纯色壁纸', path: '/pure' },
-        { name: '官方壁纸', path: '/official' },
+        // { name: '官方壁纸', path: '/official' },
         { name: '必应壁纸', path: '/bing' },
-        { name: '动态壁纸', path: '/gif' },
+        { name: '动态壁纸', path: '/dynamic' },
         { name: 'WallHaven', path: '/wallhaven' },
-        { name: 'deepin', path: '/deepin' },
         { name: '我的收藏', path: '/fav' },
     ])
     const [ currentMenu, setCurrentMenu ] = useState<MenuItem | null>(menuList[0])

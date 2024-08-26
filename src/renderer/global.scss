@@ -1,0 +1,39 @@
+:global {
+    .light {
+        --alpha-color: 0, 0, 0;
+        --alpha-bg: 255, 255, 255;
+        --bg-body: #f1f0f5;
+        --bg-card: #fff;
+        --bg-info: #f5f5f5;
+        --bg-input: #f0f1f4;
+        --bg-hover: #e2e0e0;
+        --bg-btn: #dcdada;
+        --dividing-line: #f2f2f2;
+        --border-card: var(--dividing-line);
+        --d-main: #222;
+        --d-sub: #939393;
+        --d-hover: rgba(var(--alpha-color), .5);
+        --img-bg: var(--bg-card);
+        --img-text: var(--alpha-bg);
+        --search-list-hover: rgba(255, 255, 255, .7);
+        --sportBg: linear-gradient(#fbfaee, #cad9c6);
+    }
+    .z-pointer {
+        cursor: pointer;
+    }
+    .toolbar-wrapper {
+        position: fixed;
+        bottom: 32px;
+        left: 50%;
+        padding: 0px 24px;
+        color: #fff;
+        font-size: 20px;
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 100px;
+        transform: translateX(-50%);
+        .anticon {
+            padding: 12px;
+        }
+    }
+    
+}

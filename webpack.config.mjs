@@ -1,4 +1,4 @@
-import path from 'path';
+import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import CopyPlugin from 'copy-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -49,7 +49,7 @@ const commonConfig = {
               localIdentName: '[local]--[hash:base64:5]', // 自定义生成的类名格式
             }
           },
-        }],
+        }, 'sass-loader'],
       },
       {
         test: /\.(jpg|png|svg|ico|icns)$/,
@@ -58,6 +58,12 @@ const commonConfig = {
           name: '[path][name].[ext]',
         },
       },
+      {
+        test: /\.(t|j|mj)s$/,
+        resolve: {
+          fullySpecified: false
+        }
+      }
     ],
   },
 };

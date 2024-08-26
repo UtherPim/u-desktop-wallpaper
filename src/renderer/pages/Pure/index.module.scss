@@ -1,0 +1,68 @@
+.pureContaier {
+    width: 100%;
+    height: 100%;
+
+    .customColors {
+        width: 100%;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(var(--alpha-color), 0.04);
+        .customItem {
+            --size: 18px;
+            position: relative;
+            width: var(--size, 18px);
+            height: var(--size, 18px);
+            border-radius: 50%;
+            display: flex;
+            transition: transform .2s;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+    }
+    .defaultColors {
+        width: 100%;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        .defaultItem {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: var(--bg-input);
+            padding: 5px;
+            margin: 0 6px;
+            border-radius: 3px;
+            border: 1px solid transparent;
+            box-sizing: border-box;
+            cursor: pointer;
+
+            span {
+                width: 16px;
+                height: 16px;
+                display: block;
+                border-radius: 50%;
+            }
+        }
+        .active {
+            border-color: var(--primary-color, #e5a225);
+        }
+    }
+    .colorPapers {
+        width: 100%;
+        height: calc(100% - 100px);
+        overflow: auto;
+        display: flex;
+        flex-wrap: wrap;
+
+        .paperItem {
+            margin: 3px 5px;
+            width: 200px;
+            height: 120px;
+            border-radius: var(--card-radius, 9px);
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+    }
+}

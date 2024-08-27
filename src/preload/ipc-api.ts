@@ -10,7 +10,7 @@ function rendererReady() {
 function setWallpaper(url: string, options: SetOptions & SetPaperPicOption): Promise<void> {
   return ipcRenderer.invoke('set-wallpaper', url, options)
 }
-function setVideo2Wallpaper(url: string): Promise<void> {
+function setVideo2Wallpaper(url: string): Promise<number> {
   return ipcRenderer.invoke('set-video-to-wallpaper', url)
 }
 

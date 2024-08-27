@@ -9,6 +9,8 @@ import { getDynamicListBySort } from '_renderer/request/dynamic'
 import styled from './index.module.scss'
 import { isScrollBottom } from '_renderer/utils'
 
+import { setCurrentWinId } from '_renderer/store/dynamic'
+
 type DynamicListProps = {
     dynamicPaperList: DynamicPaperItem[],
     setDynamicPaperList: (dynamicPaperList: DynamicPaperItem[]) => void,
@@ -42,9 +44,11 @@ const DynamicList: React.FC<DynamicListProps> = (props) => {
         if(filePath) {
             window.ipcAPI?.setVideo2Wallpaper(filePath as string)
         }else {
-            window.ipcAPI?.saveFile(raw, { filename: title ? title: `${name}.${endWith}` , from: 'dynamic' }).then(({ filePath }) => {
+            window.ipcAPI?.saveFile(raw, { filename: title ? title: `${name}.${endWith}` , from: 'dynamic' }).then(async ({ filePath }) => {
                 console.log(filePath)
-                window.ipcAPI?.setVideo2Wallpaper(filePath)
+                const winId = await window.ipcAPI?.setVideo2Wallpaper(filePath)
+                console.log(winId)
+                setCurrentWinId(winId)
             })
         }
     }

@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '..'
 
 export interface DynamicState {
-    currentWinId: number | null,
+    currentWinId: number | undefined,
 }
 
 const initialState: DynamicState = {
@@ -13,7 +13,7 @@ export const dynamicSlice = createSlice({
     name: 'dynamic',
     initialState,
     reducers: {
-        setCurrentWinId(state, action: PayloadAction<number | null>) {
+        setCurrentWinId(state, action: PayloadAction<number | undefined>) {
             state.currentWinId = action.payload
         }
     }

@@ -5,6 +5,7 @@ import axios from 'axios'
 import { SetPaperPicOption, SaveFileOption } from '_types/pic'
 import fs from 'fs'
 import path from 'path'
+import {attach, detach, refresh} from "electron-as-wallpaper";
 import { createBgWindow } from '../utils'
 
 ipcMain.on('renderer-ready', () => {
@@ -34,6 +35,12 @@ ipcMain.handle('set-wallpaper', async (e: IpcMainInvokeEvent, url: string, optio
 
 ipcMain.handle('set-video-to-wallpaper', async (e: IpcMainInvokeEvent, url: string) => {
   const win = createBgWindow(url)
+  attach(win, {
+    transparent: true,
+    forwardKeyboardInput: true,
+    forwardMouseInput: true,
+  });
+  
   return win.webContents.id
 })
 

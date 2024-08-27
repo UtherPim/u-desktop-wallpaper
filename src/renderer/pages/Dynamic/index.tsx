@@ -37,13 +37,13 @@ const Dynamic: React.FC = () => {
     const closeDynamicWin = () => {
         if(currentWinId) {
             window.ipcAPI?.closeWin(currentWinId as number)
-            setCurrentWinId(null)
+            setCurrentWinId()
         }else {
             message.warning('没有已打开的动态窗口')
         }
     }
 
-    const tabBarExtraContent = (<Button size='small' onClick={closeDynamicWin}>关闭动态壁纸窗口</Button>)
+    const TabBarExtraContent = (<Button size='small' onClick={closeDynamicWin}>关闭动态壁纸窗口</Button>)
 
     useEffect(() => {
         getDynamicListBySort({page: 1, size: 30, sortKey: currentType}).then(res => {
@@ -70,7 +70,7 @@ const Dynamic: React.FC = () => {
 
     return (
         <div className={styled.dynamicContainer}>
-            <Tabs defaultActiveKey='updateTime' items={items} onChange={onChangeType} style={{ height: '100%' }}></Tabs> 
+            <Tabs tabBarExtraContent={TabBarExtraContent} defaultActiveKey='updateTime' items={items} onChange={onChangeType} style={{ height: '100%' }}></Tabs> 
         </div>
     )
 }

@@ -2,12 +2,11 @@
  * Entry point of the Election app.
  */
 
-
 import * as path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { BrowserWindow, app, globalShortcut, Menu } from 'electron';
 import * as nodeEnv from '_utils/node-env';
-import './ipc-listerner';
+import { mainWinListerner } from './ipc-listerner';
 import fs from 'fs'
 
 const appDataPath = path.join(app.getPath('appData'), 'u-desktop')
@@ -16,6 +15,23 @@ const wallhavenCachePath = path.join(appDataPath, 'wallhaven-pic')
 const dynamicCachePath = path.join(appDataPath, 'dynamic-pic')
 
 let mainWindow: Electron.BrowserWindow | undefined;
+
+// 单实例锁
+if(process.platform === 'win32') {
+  const gotTheLock = app.requestSingleInstanceLock()
+  if (!gotTheLock) {
+    app.quit()
+  } else {
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+      if (mainWindow) {
+        if (!mainWindow.isVisible()) {
+          mainWindow.show()
+        }
+        mainWindow.focus()
+      }
+    })
+  }
+}
 
 function createWindow() {
   // Create the browser window.
@@ -31,6 +47,11 @@ function createWindow() {
       webSecurity: nodeEnv.prod,
     },
   });
+
+  
+  global.mainWinId = mainWindow.id
+
+  mainWinListerner(mainWindow)
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html').finally(() => { /* no action */ });
@@ -61,10 +82,13 @@ app.whenReady().then(async () => {
   if(!fs.existsSync(appDataPath)) {
     try{
       fs.mkdirSync(appDataPath, { recursive: true })
+
       if(!fs.existsSync(bingCachePath))
       await fs.promises.mkdir(bingCachePath, { recursive: true })
+
       if(!fs.existsSync(wallhavenCachePath))
       await fs.promises.mkdir(wallhavenCachePath, { recursive: true })
+    
       if(!fs.existsSync(dynamicCachePath))
       await fs.promises.mkdir(dynamicCachePath, { recursive: true })
     }catch(e) {

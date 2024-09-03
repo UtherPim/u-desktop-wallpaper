@@ -2,6 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
+    "types": ["node"],
     "module": "ES2020",
     "moduleResolution": "Node",
     "paths": {

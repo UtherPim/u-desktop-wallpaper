@@ -8,6 +8,7 @@ import {
 import { Space } from 'antd'
 import styled from './index.module.scss'
 import { setWindowStatus, stateValue } from '_renderer/store/app'
+import type { WindowStatusType } from '_renderer/store/app'
 import { useAppDispatch, useAppSelector } from '_renderer/store/hooks'
 
 const TopFrame: React.FC = () => {
@@ -18,17 +19,27 @@ const TopFrame: React.FC = () => {
   const handleMin = () => {
     console.log('min')
     dispatch(setWindowStatus('min'))
+    window.ipcAPI?.minMainWin()
   }
   const handleClose = () => {
+    window.ipcAPI?.closeMainWin()
     console.log('close')
   }
   const handleRestore = () => {
-    console.log('restore')
-    dispatch(setWindowStatus('default'))
+    console.log('restore', windowStatus)
+    
+    if(windowStatus === 'max') {
+      dispatch(setWindowStatus('default'))
+      window.ipcAPI?.unMaxMainWin()
+    }else {
+      dispatch(setWindowStatus('default'))
+      window.ipcAPI?.restoreMainWin()
+    }
   }
   const handleMax = () => {
     console.log('max')
     dispatch(setWindowStatus('max'))
+    window.ipcAPI?.maxMainWin()
   }
 
   return (

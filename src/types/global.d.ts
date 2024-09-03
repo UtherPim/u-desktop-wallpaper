@@ -3,6 +3,7 @@ declare global {
     /** APIs for Electron IPC */
     ipcAPI?: typeof import('_preload/ipc-api').default
   }
+  var mainWinId: number
 }
 
 declare module '*.scss'

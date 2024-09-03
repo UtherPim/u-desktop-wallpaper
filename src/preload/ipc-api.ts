@@ -7,6 +7,21 @@ import type { SetPaperPicOption, SaveFileOption } from '_types/pic'
 function rendererReady() {
   ipcRenderer.send('renderer-ready');
 }
+function closeMainWin() {
+  return ipcRenderer.invoke('close-main-win')
+}
+function maxMainWin() {
+  return ipcRenderer.invoke('max-main-win')
+}
+function unMaxMainWin() {
+  return ipcRenderer.invoke('unmax-main-win')
+}
+function minMainWin() {
+  return ipcRenderer.invoke('min-main-win')
+}
+function restoreMainWin() {
+  return ipcRenderer.invoke('restore-main-win')
+}
 function setWallpaper(url: string, options: SetOptions & SetPaperPicOption): Promise<void> {
   return ipcRenderer.invoke('set-wallpaper', url, options)
 }
@@ -30,4 +45,17 @@ function closeWin(winId: number) {
   ipcRenderer.invoke('close-win', winId)
 }
 
-export default { rendererReady, setWallpaper, setVideo2Wallpaper, saveFile, onSetVideoPaper, hasFile, closeWin };
+export default { 
+  rendererReady, 
+  setWallpaper, 
+  setVideo2Wallpaper, 
+  saveFile, 
+  onSetVideoPaper, 
+  hasFile, 
+  closeWin,
+  closeMainWin,
+  maxMainWin,
+  unMaxMainWin,
+  minMainWin,
+  restoreMainWin 
+};

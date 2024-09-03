@@ -8,10 +8,40 @@ import path from 'path'
 import {attach, detach, refresh} from "electron-as-wallpaper";
 import { createBgWindow } from '../utils'
 
-ipcMain.on('renderer-ready', () => {
-  // eslint-disable-next-line no-console
-    console.log('Renderer is ready.');
-});
+export const mainWinListerner =  function(mainWin?: BrowserWindow) {
+
+  if(!mainWin) {
+    mainWin = BrowserWindow.fromId(global.mainWinId) || undefined
+  }
+
+  if(!mainWin) return;
+
+  ipcMain.on('renderer-ready', () => {
+    // eslint-disable-next-line no-console
+      console.log('Renderer is ready.');
+  });
+
+  ipcMain.handle('close-main-win', (e: IpcMainInvokeEvent) => {
+    mainWin?.close()
+  })
+
+  ipcMain.handle('max-main-win', (e: IpcMainInvokeEvent) => {
+    mainWin?.maximize()
+  })
+
+  ipcMain.handle('unmax-main-win', (e: IpcMainInvokeEvent) => {
+    mainWin?.unmaximize()
+  })
+
+  ipcMain.handle('min-main-win', (e: IpcMainInvokeEvent) => {
+    mainWin?.minimize()
+  })
+
+  ipcMain.handle('restore-main-win', (e: IpcMainInvokeEvent) => {
+    mainWin?.restore()
+  })
+
+}
 
 ipcMain.handle('close-win', (e: IpcMainInvokeEvent, winId: number) => {
   const win = BrowserWindow.fromId(winId)
